@@ -1,4 +1,3 @@
-Aqui está uma versão do seu README.md reestruturada com scannability otimizada, padronização de formatação Markdown e hierarquia clara para repositórios do GitHub.
 🚀 Detecção de Anomalias em Transações PIX (BACEN)
 Pipeline completo em Python para extração de dados públicos de transações PIX diretamente da API do Banco Central do Brasil (BACEN), seguido de engenharia de atributos, detecção de comportamento financeiro atípico via Isolation Forest e visualização interativa de resultados.
 📋 Sumário
