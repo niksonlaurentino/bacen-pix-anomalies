@@ -1,95 +1,149 @@
-🚀 Detecção de Anomalias em Transações PIX (BACEN)
-Pipeline completo em Python para extração de dados públicos de transações PIX diretamente da API do Banco Central do Brasil (BACEN), seguido de engenharia de atributos, detecção de comportamento financeiro atípico via Isolation Forest e visualização interativa de resultados.
-📋 Sumário
-•	Estrutura do Projeto
-•	Requisitos
-•	Instalação
-•	Como Usar
-•	Exemplos de Uso
-•	Saídas Geradas
-•	Observações e Limitações
-•	Licença
-🗂️ Estrutura do Projeto
-Plaintext
+# Detecção de Anomalias em Transações PIX (Dados BACEN)
+
+Projeto que baixa dados públicos de transações **PIX** diretamente da API do **Banco Central do Brasil (BACEN)**, realiza engenharia de atributos e utiliza um modelo **Isolation Forest** (scikit-learn) para detectar contas com comportamento financeiro atípico (possíveis anomalias/fraudes), com visualizações interativas via `matplotlib`/`seaborn`.
+
+## 📋 Sumário
+
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Requisitos](#-requisitos)
+- [Instalação](#-instalação)
+- [Como usar](#-como-usar)
+- [Exemplos de uso](#-exemplos-de-uso)
+- [Saídas geradas](#-saídas-geradas)
+- [Observações e limitações](#-observações-e-limitações)
+- [Licença](#-licença)
+
+## 🗂️ Estrutura do projeto
+
+```
 .
 ├── API_BACEN_data_download.py   # Módulo de extração de dados via API OData do BACEN
-├── Main.py                      # Pipeline de engenharia de atributos, ML e visualização
-└── dados_pix_selecionado.csv    # Gerado automaticamente pelo download (não versionado)
-Detalhamento dos Módulos
-•	API_BACEN_data_download.py: Expõe a função baixar_dados_bacen(). Solicita parâmetros via terminal (ano, mês e volume de linhas), consulta o endpoint CnaePorteRecebedor do BACEN e salva o resultado em dados_pix_selecionado.csv.
-•	Main.py: Gerencia a execução completa. Realiza o download dos dados, executa a limpeza, faz o tratamento e engenharia de variáveis, treina o modelo IsolationForest e gera painéis gráficos interativos.
-✅ Requisitos
-•	Python: 3.9 ou superior
-•	Conexão com a internet para requisições à API pública do BACEN
-Dependência	Versão Mínima
-pandas	>= 1.5.0
-numpy	>= 1.23.0
-requests	>= 2.28.0
-scikit-learn	>= 1.2.0
-matplotlib	>= 3.6.0
-seaborn	>= 0.12.0
-🚀 Instalação
-1.	Clone o repositório:
-Bash
-git clone https://github.com/seu-usuario/anomalias-pix-bacen.git
-cd anomalias-pix-bacen
-2.	Crie e ative um ambiente virtual (recomendado):
-Bash
-# Linux/macOS
-python3 -m venv venv
-source venv/bin/activate
+├── Main.py                      # Pipeline de engenharia de atributos, modelagem e visualização
+└── dados_pix_selecionado.csv    # Gerado automaticamente após o download (não versionar)
+```
 
-# Windows
-python -m venv venv
-venv\Scripts\activate
-3.	Instale as dependências:
-Bash
-pip install pandas numpy requests scikit-learn matplotlib seaborn
-Dica: Se optar por utilizar um arquivo requirements.txt, execute pip install -r requirements.txt.
-🖥️ Como Usar
-Execute o script principal para rodar o pipeline interativo de ponta a ponta:
-Bash
+- **`API_BACEN_data_download.py`**: expõe a função `baixar_dados_bacen()`, que solicita interativamente (via terminal) o ano, mês e quantidade de linhas desejadas, consulta o endpoint `CnaePorteRecebedor` da API pública do BACEN e salva o resultado em `dados_pix_selecionado.csv`.
+- **`Main.py`**: importa o módulo acima, executa o download, carrega o CSV gerado, aplica engenharia de atributos (volume por pagador, ticket médio, ratios, transformações logarítmicas), treina um `IsolationForest` para detectar anomalias e exibe painéis gráficos com os resultados.
+
+## ✅ Requisitos
+
+- Python 3.9+
+- Conexão com a internet (para consultar a API do BACEN)
+- Bibliotecas Python:
+  - `pandas`
+  - `numpy`
+  - `requests`
+  - `scikit-learn`
+  - `matplotlib`
+  - `seaborn`
+
+## 🚀 Instalação
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/seu-usuario/anomalias-pix-bacen.git
+   cd anomalias-pix-bacen
+   ```
+
+2. (Opcional, mas recomendado) Crie um ambiente virtual:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
+   ```
+
+3. Instale as dependências:
+
+   ```bash
+   pip install pandas numpy requests scikit-learn matplotlib seaborn
+   ```
+
+   Ou crie um arquivo `requirements.txt` com o conteúdo abaixo e instale com `pip install -r requirements.txt`:
+
+   ```
+   pandas>=1.5.0
+   numpy>=1.23.0
+   requests>=2.28.0
+   scikit-learn>=1.2.0
+   matplotlib>=3.6.0
+   seaborn>=0.12.0
+   ```
+
+## 🖥️ Como usar
+
+Basta executar o script principal:
+
+```bash
 python Main.py
-Durante a execução, o terminal solicitará as seguintes entradas:
-•	Ano de partida (formato YYYY, limitado ao ano atual)
-•	Mês de início (numérico, dependendo do ano informado)
-•	Quantidade de linhas por arquivo (mínimo 100, máximo 10.000)
-Fluxo de Processamento Automático
-•	Download & Limpeza: Salva os dados brutos e descarta colunas com alta vacuidade (vlcompra, vldinespec).
-•	Feature Engineering: Divisão treino/teste (80/20), cálculo de métricas derivadas (escala logarítmica para volume e ticket médio, razão pagador/recebedor) e padronização com StandardScaler.
-•	Modelagem: Treinamento do modelo IsolationForest com taxa de contaminação fixa de 1%.
-•	Análise: Exibição das 10 principais anomalias no console e geração dos painéis visuais.
-💡 Exemplos de Uso
-Execução interativa padrão:
-Bash
+```
+
+Durante a execução, o terminal solicitará interativamente as seguintes informações (definidas em `API_BACEN_data_download.py`):
+
+1. **Ano de partida** para o extrato (formato `YYYY`, até o ano atual).
+2. **Mês de início** do extrato (a faixa de meses válidos depende do ano informado).
+3. **Quantidade de linhas** a baixar por arquivo (mínimo 100, máximo 10.000).
+
+Após o download, o script:
+1. Salva os dados em `dados_pix_selecionado.csv`.
+2. Remove colunas com muitos valores nulos (`vlcompra`, `vldinespec`, se presentes).
+3. Divide os dados em treino/teste (80/20).
+4. Cria atributos derivados (ex.: `log_vol_por_pagador`, `log_ticket_medio`, `ratio_pag_rec`).
+5. Normaliza os dados com `StandardScaler`.
+6. Treina um `IsolationForest` (contaminação de 1%) para identificar anomalias.
+7. Imprime no console as 10 anomalias mais severas e uma comparação entre pequenos negócios/pessoas físicas e demais portes.
+8. Exibe dois painéis gráficos (scatter plot, gráfico de barras por porte, histograma de score, top 10 anomalias e gráfico de rosca de composição de risco).
+
+## 💡 Exemplos de uso
+
+### Executando o pipeline completo (interativo)
+
+```bash
 python Main.py
+```
+
 Exemplo de interação no terminal:
-Plaintext
+
+```
 Qual será ano de ponto de partida para solicitar extrato? (YYYY): 2024
 Ano selecionado: 2024
 Digite o número do mês de início do extrato (1 a 8): 3
 Quantas linhas para baixar por arquivo? (MIN 100, MAX 10000): 5000
-Testando apenas o módulo de extração:
-Bash
+```
+
+### Testando apenas o módulo de extração de dados
+
+O módulo `API_BACEN_data_download.py` pode ser executado isoladamente para validar a extração, sem rodar o pipeline de modelagem:
+
+```bash
 python API_BACEN_data_download.py
-Importando o módulo em scripts externos:
-Python
+```
+
+### Importando a função de download em outro script
+
+```python
 import API_BACEN_data_download as bacen
 
-# Solicita os parâmetros interativamente e retorna um DataFrame
-df = bacen.baixar_dados_bacen()
+df = bacen.baixar_dados_bacen()  # solicitará ano, mês e nº de linhas via input()
 print(df.head())
-📊 Saídas Geradas
-•	dados_pix_selecionado.csv: Dataset bruto extraído do BACEN.
-•	Console: Mapeamento do quantitativo de registros, listagem das 10 anomalias mais severas (com valores formatados em R$) e proporção de alertas segregados por porte de empresa.
-•	Painéis Gráficos (matplotlib/seaborn):
-o	Painel 1: Scatter plot em escala logarítmica (lançamentos vs. volume líquido), gráfico de barras de anomalias por porte e histograma dos scores de anomalia.
-o	Painel 2: Ranking com as 10 maiores anomalias por volume financeiro e gráfico de rosca ilustrando a composição de risco.
-⚠️ Observações e Limitações
-•	Entrada Manual: A rotina do módulo API_BACEN_data_download.py utiliza input(), demandando adaptações para ser integrada a pipelines de agendamento automático (como Airflow ou Cron).
-•	Estabilidade do Endpoint: O serviço consulta a API OData do BACEN (CnaePorteRecebedor), sujeito a variações de disponibilidade do órgão público.
-•	Hiperparâmetros do Modelo: O parâmetro contamination=0.01 do IsolationForest assume uma taxa fixa de 1% de discrepâncias. É recomendável reavaliar esse parâmetro conforme o volume e o comportamento do conjunto de dados extraído.
-•	Controle de Versão: É altamente recomendável incluir o arquivo dados_pix_selecionado.csv no .gitignore para evitar o commit de bases temporárias no repositório.
-📄 Licença
-Este projeto é distribuído sob os termos da licença MIT. Consulte o arquivo de licença para mais detalhes.
+```
 
+## 📊 Saídas geradas
+
+- **`dados_pix_selecionado.csv`**: dados brutos baixados da API do BACEN para o período solicitado.
+- **Console**: total de registros, top 10 anomalias mais severas (com valores formatados em R$), e proporção de alertas por porte.
+- **Gráficos (via `plt.show()`)**:
+  - Painel 1: scatter plot (escala log) de quantidade de lançamentos vs. volume líquido, barras de anomalias por porte e histograma da distribuição do score de anomalia.
+  - Painel 2: barras com as top 10 anomalias por volume (em bilhões de R$) e gráfico de rosca com a composição de risco (Pessoa Física/Microempresa vs. demais portes).
+
+## ⚠️ Observações e limitações
+
+- O script `API_BACEN_data_download.py` depende de **entrada manual via terminal** (`input()`), portanto não é adequado para execução totalmente automatizada/agendada sem adaptações.
+- O endpoint consultado é o `CnaePorteRecebedor` da API OData pública do BACEN; instabilidades ou mudanças no serviço podem afetar o download.
+- O modelo `IsolationForest` é treinado com uma taxa de contaminação fixa de 1% (`contamination=0.01`); ajuste esse parâmetro conforme a base de dados utilizada.
+- Recomenda-se **não versionar** o arquivo `dados_pix_selecionado.csv` no Git, adicionando-o ao `.gitignore`.
+
+## 📄 Licença
+
+Este projeto está licenciado sob os termos da licença MIT. Sinta-se livre para usar, modificar e distribuir.
